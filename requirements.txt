@@ -1,0 +1,4 @@
+tk
+watchdog
+pip
+opencv-python
