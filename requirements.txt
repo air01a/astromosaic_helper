@@ -1,4 +1,8 @@
 tk
+PySimpleGUI
 watchdog
-pip
+av
 opencv-python
+pillow
+scipy
+scikit-image
