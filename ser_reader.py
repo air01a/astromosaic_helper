@@ -3,7 +3,20 @@
 import types
 import numpy as np
 import cv2
+from PIL import Image
 
+def blur_index(image):
+    # Charger l'image en niveaux de gris
+    #image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+
+    # Calculer le gradient de l'image
+    gradient_x = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=3)
+    gradient_y = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=3)
+
+    # Calculer l'indice de flou comme la somme des carrés des gradients
+    blur_index_value = np.sum(gradient_x**2) + np.sum(gradient_y**2)
+
+    return blur_index_value
 
 class reader(object):
     def __init__(self,fname):
@@ -63,15 +76,20 @@ class reader(object):
         frame = np.reshape(frame,(self.header.imageHeight,self.header.imageWidth,self.header.numPlanes))
         return frame
 
-
+i=0
 if __name__ == '__main__':
     fname=r'C:/Users/eniquet/Pictures/soleil raw/17_40_34.ser'
     ser = reader(fname)
     for n in range(ser.header.frameCount):
         frame = ser.getImg()
         frame=cv2.cvtColor(frame, cv2.COLOR_BAYER_GR2RGB)
-        cv2.imshow('x',frame)
-        cv2.waitKey(int(1000/30))
+
+        #cv2.imshow('x',frame)
+        #cv2.imwrite("moon%i.png" %i, frame)
+        print(blur_index(frame))
+        i=i+1
+
+        cv2.waitKey(int(1000/300))
     cv2.destroyAllWindows()
     cv2.waitKey(1)
                 
