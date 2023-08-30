@@ -1,39 +1,40 @@
-import tkinter as tk
-from tkinter import filedialog
-from PIL import Image, ImageTk
+import PySimpleGUI as sg
+import os
+from diskdetector import DiskDetector
+from image_utils import ImageHelper
+from layout import get_layout
 
-class FullscreenImageViewer:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Visionneuse d'images en plein écran")
 
-        # Créer un canevas pour afficher l'image
-        self.canvas = tk.Canvas(root, bg="black", highlightthickness=0)
-        self.canvas.pack(fill=tk.BOTH, expand=True)
 
-        # Demander à l'utilisateur de choisir un fichier image
-        self.file_path = filedialog.askopenfilename(filetypes=[("Images", "*.png;*.jpg;*.jpeg;*.gif;*.bmp")])
-        if not self.file_path:
-            self.root.destroy()
-            return
+def run():
+    # Créer la disposition de l'interface graphique
+    sg.theme('Black')
+    layout = get_layout()
 
-        # Afficher l'image en plein écran
-        self.image = Image.open(self.file_path)
-        self.photo = ImageTk.PhotoImage(self.image)
-        self.canvas.create_image(0, 0, anchor=tk.NW, image=self.photo)
+    window = sg.Window('Sélection de répertoire et affichage d\'image', layout, finalize=True, element_justification='c'
+    
+    )
+    image_helper = ImageHelper()
 
-        # Configurer la fenêtre pour le plein écran
-        #self.root.attributes('-fullscreen', True)
 
-        # Lier la touche Echap pour quitter le plein écran
-        self.root.bind("<Escape>", self.exit_fullscreen)
+    window['-IMAGE-'].update(data=image_helper.open_image_base())
 
-    def exit_fullscreen(self, event):
-        # Quand la touche Echap est pressée, quitter le plein écran et fermer la fenêtre
-        self.root.attributes('-fullscreen', False)
-        self.root.destroy()
+    while True:
+        event, values = window.read()
+
+        if event == sg.WINDOW_CLOSED or event == 'Quitter':
+            break
+
+        if event == "Analyse":
+            folder_path = values['-FOLDER-']
+            image_files = [file for file in os.listdir(folder_path) if file.lower().endswith(('.ser','.png', '.jpg', '.jpeg', '.gif', '.bmp'))]
+
+            if len(image_files) > 0:
+                image_file_path = os.path.join(folder_path, image_files[0])
+                window['-IMAGE-'].update(filename=image_file_path)
+
+    window.close()
+
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    viewer = FullscreenImageViewer(root)
-    root.mainloop()
+    run()
