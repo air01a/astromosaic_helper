@@ -24,6 +24,6 @@ With the Sun, the different algorithm that can be used to stitch the mosaic lack
 
 So, I have chosen a different approch. I use cv2 to find the contour of the sun (an arc for each image), calculate the center and radius of the arc, then interpolate the picture coordinates to find the correct position of the image in a sun picture.
 
-![Alt text](https://github.com/air01a/astromosaic_helper/blob/main/doc/diskdetector?raw=true "sun final") 
+![Alt text](https://github.com/air01a/astromosaic_helper/blob/main/doc/diskdetector.jpg?raw=true "sun final") 
 
 That was not so easy, but it works :)
