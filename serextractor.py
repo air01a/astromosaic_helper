@@ -37,8 +37,11 @@ def extract_image_from_ser(video_path, frame_number, output_image_path):
     container.close()
 
 # Exemple d'utilisation
-video_path = "C:/Users/eniquet/Pictures/soleil raw/17_40_34.ser"
+video_path = "C:/Users/eniquet/Pictures/soleil raw/"
 output_image_path = "moon"
 frame_number = 100  # Numéro du cadre que vous voulez extraire
+
+
+
 
 extract_image_from_ser(video_path, frame_number, output_image_path)
