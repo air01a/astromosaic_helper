@@ -10,6 +10,8 @@ class DiskDetector:
     def __init__(self, image):
         h = int(image.shape[0]*self.width/image.shape[1])
         self.image = cv2.resize(image, (self.width, h))
+        if self.image.dtype==np.uint16:
+            self.image = (self.image/256).astype(np.uint8)
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
         self.image_blur = cv2.GaussianBlur(gray, (5, 5), 0)
         self.image_blur = cv2.convertScaleAbs(self.image_blur, alpha=5, beta=0)
@@ -18,48 +20,38 @@ class DiskDetector:
         self.diag = np.sqrt(self.width**2+self.height**2)
 
     def _max(self, contour):
-        return cv2.arcLength(contour,False)
 
+        return cv2.arcLength(contour, True)
 
+    
     def detect(self):
         edges = cv2.Canny(self.image_blur, threshold1=30, threshold2=70)
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        self.disk = max(contours, key=cv2.contourArea)
+        self.disk = max(contours, key=self._max)
         epsilon = 0.0015*cv2.arcLength(self.disk,True)
         self.approx = cv2.approxPolyDP(self.disk,epsilon,True)
-        #cv2.drawContours(self.image, contours, -1, (0,0,255), 3)
+        cv2.drawContours(self.image, [self.approx], -1, (0,0,255), 3)
 
     def calculate_disk_coordinates(self):
         
         points = self.approx[:, 0, :] 
         num_points = len(points)
-
-        #sum_center_x, sum_center_y = 0,0
-        #sum_radius=0
-        #n_points=0
-        #print(num_points)
-        #np.random.shuffle(points)
-        #for i in range(2): #range(int(num_points)):
+        #x1, y1 = points[int(num_points/4)]
+        #x2, y2 = points[int(num_points / 2)]
+        #x3, y3 = points[int(num_points*3/4)]
         x1, y1 = points[0]
         x2, y2 = points[int(num_points / 2)]
-        x3, y3 = points[num_points-1]
-
+        x3, y3 = points[-1]
         D = 2 * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2))
         center_x=(((x1**2 + y1**2) * (y2 - y3) + (x2**2 + y2**2) * (y3 - y1) + (x3**2 + y3**2) * (y1 - y2)) / D)
         center_y=(((x1**2 + y1**2) * (x3 - x2) + (x2**2 + y2**2) * (x1 - x3) + (x3**2 + y3**2) * (x2 - x1)) / D)
 
         radius = np.sqrt((center_x - x1)**2 + (center_y - y1)**2)
-        #n_points +=1
-        #    else:
-        #        print("D=0")
-        #self.center_x = (sum_center_x/(self.width*n_points))
-        #self.center_y = (sum_center_y/(self.height*n_points))
+
         self.center_x = center_x / self.width
         self.center_y = center_y / self.height
         self.radius = radius / self.diag
-        #self.radius = (sum_radius/(np.sqrt(self.width**2 + self.height**2)*n_points))
 
-        #print(self.center_x*self.width, self.center_y*self.height, self.radius*(np.sqrt(self.width**2 + self.height**2)))
         return (self.center_x, self.center_y, self.radius)
 
     def get_disk_coordinates(self):
@@ -117,13 +109,6 @@ if __name__ == '__main__':
     center_x = int(base_w/2)
     center_y = int(base_h/2)
 
-
-    """dd=DiskDetector(image_base)
-    dd.detect()
-    dd.calculate_disk_coordinates()
-    (x,y,r)  = dd.get_disk_coordinates()
-    cv2.imshow('test',dd.draw_image_circle(image_base))
-    cv2.waitKey(10)"""
     
 
  
@@ -137,7 +122,7 @@ if __name__ == '__main__':
         image = disk_detect.draw_image_circle()
         #disk_detect.draw_image_contour(image)
         cv2.imshow('None approximation' + path, image)
-        cv2.waitKey(10)
+        cv2.waitKey(4000)
         polarbbox = disk_detect.get_polar_bounding_box()
         bbox.append(polarbbox)
 

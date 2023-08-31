@@ -6,6 +6,7 @@ def get_layout():
         [sg.InputText(key='-FOLDER-'), sg.FolderBrowse()],
         [sg.Radio('Sun', "TYPE", key='-OPTION1-', default=True),sg.Radio('Moon', "TYPE", key='-OPTION2-', default=False),sg.Radio('DeepSky', "TYPE", key='-OPTION3-', default=False)],
         [sg.Button('Analyse')],
+        [sg.Text('',  text_color='green', key='-RUNNING-')],
         [sg.Image(key='-IMAGE-', size=(640, 480))],
         [sg.Button('Quitter')]
     ]
