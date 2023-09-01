@@ -7,14 +7,23 @@ import time
 class DiskDetector:
     width = 640
 
-    def __init__(self, image):
+    def __init__(self, image,alpha=1.5):
         h = int(image.shape[0]*self.width/image.shape[1])
         self.image = cv2.resize(image, (self.width, h))
         if self.image.dtype==np.uint16:
             self.image = (self.image/256).astype(np.uint8)
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
-        self.image_blur = cv2.GaussianBlur(gray, (5, 5), 0)
-        self.image_blur = cv2.convertScaleAbs(self.image_blur, alpha=5, beta=0)
+
+
+        #self.image_blur = cv2.GaussianBlur(gray, (5, 5), 0)
+
+        #self.image_blur = cv2.convertScaleAbs(self.image_blur, alpha=3, beta=20)
+        _, self.image_blur = cv2.threshold(gray, 20, 255, cv2.THRESH_BINARY)
+
+        #cv2.imshow('test',self.image_blur)
+        #cv2.waitKey(0)
+        #_, self.image_blur = cv2.threshold(self.image_blur, 200, 255, cv2.THRESH_BINARY)
+  
         self.center_x, self.center_y, self.radius = None, None, None
         self.height = h
         self.diag = np.sqrt(self.width**2+self.height**2)
@@ -68,11 +77,11 @@ class DiskDetector:
         cv2.drawContours(image, [self.approx], -1, (0,0,255), 3)
         return image
     
-    def draw_image_circle(self, image=None):
+    def draw_image_circle(self, image=None, thickness=2):
         if image is None:
             image = self.image.copy()
         if self.center_x!=None:
-            cv2.circle(image, (int(self.center_x*image.shape[1]), int(self.center_y*image.shape[0])), int(self.radius*np.sqrt(image.shape[1]**2+image.shape[0]**2)), (0, 255, 0), 2)
+            cv2.circle(image, (int(self.center_x*image.shape[1]), int(self.center_y*image.shape[0])), int(self.radius*np.sqrt(image.shape[1]**2+image.shape[0]**2)), (0, 255, 0), thickness)
 
         return image
     
@@ -99,10 +108,10 @@ class DiskDetector:
 if __name__ == '__main__':
     new_r = 309.83
 
-    folder_path = 'test/'
+    folder_path = 'work/'
     image_paths = [folder_path+file for file in os.listdir(folder_path) if file.lower().endswith(('.png'))]
     bbox=[]
-    image_base = cv2.imread('base.png')
+    image_base = cv2.imread('base_sun.png')
     h = int(image_base.shape[0]*640/image_base.shape[1])
     image_base=cv2.resize(image_base, (640, h))
     (base_w,base_h) = (image_base.shape[1], image_base.shape[0])

@@ -1,0 +1,1 @@
+pyinstaller --noconfirm --onefile --windowed --icon "icon.ico" --log-level "ERROR" --add-data "base.png;."  "main.py"

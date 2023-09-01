@@ -161,3 +161,11 @@ cython_debug/
 Scripts/
 
 pyvenv.cfg
+
+output/
+Lib/
+pyvenv.cfg
+test/*
+test/
+Include/
+test

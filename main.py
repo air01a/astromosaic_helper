@@ -11,12 +11,12 @@ def run():
     layout = get_layout()
     observer = None
 
-    window = sg.Window('Sélection de répertoire et affichage d\'image', layout, finalize=True, element_justification='c')
+    window = sg.Window('Astro mosaic helper [easyastro]', layout, finalize=True, element_justification='c')
     image_helper = ImageHelper()
 
-
-    window['-IMAGE-'].update(data=image_helper.open_image_base())
-    display_detector = DisplayDiskDetector(window, image_helper, image_helper.image_base,309.83)
+    mosaic_type=0
+    window['-IMAGE-'].update(data=image_helper.open_image_base(mosaic_type))
+    
 
 
     running = False
@@ -27,13 +27,34 @@ def run():
             if (observer != None):
                 observer.stop()
                 observer.join()
+                display_detector.stop()
             break
+
+        if event=='-OPTION_SUN-' and not running:
+            mosaic_type=1
+            window['-IMAGE-'].update(data=image_helper.open_image_base(mosaic_type))
+        if event=='-OPTION_MOON-' and not running:
+            mosaic_type=0
+            window['-IMAGE-'].update(data=image_helper.open_image_base(mosaic_type))
+
+
+        if event == '-UPDATE MINIATURE-':
+            window['-IMAGE-'].update(data=image_helper.cv2_to_sg(display_detector.base_image))
+            window.extend_layout(window['thumb'],image_helper.min_to_sg_grid(display_detector.thumbnails[values[event]]))
+            window['thumb'].Widget.update() 
+            window['thumb'].contents_changed()
+            window.Refresh()
+
+        if event == '-NEW TASK-':
+            window.Element('-TASKING-').update('Working file: %s' % values[event])
 
         if event == "Analyse":
             if running:
                 observer.stop()
                 observer.join()
-                window['-IMAGE-'].update(data=image_helper.open_image_base())   
+                display_detector.stop()
+
+                window['-IMAGE-'].update(data=image_helper.open_image_base(mosaic_type))   
                 window.Element('Analyse').update('Analyze')
                 running = False
             else:
@@ -43,10 +64,9 @@ def run():
                     window.Element('Analyse').update('Stop')
                     window.Element('-RUNNING-').update('Watching Repertory %s' % folder_path)
                     window.Refresh()
-                    image_files = [file for file in os.listdir(folder_path) if file.lower().endswith(('.ser'))]
-                    if len(image_files) > 0:
-                        
-                        #window['-IMAGE-'].update(filename=image_file_path)
+                    display_detector = DisplayDiskDetector(window, image_helper, image_helper.image_base,309.83)
+                    image_files = [file for file in os.listdir(folder_path) if ImageHelper.is_image_supported_format(file)]
+                    if len(image_files) > 0:                
                         for f in image_files:
                             image_file_path = os.path.join(folder_path, f)
                             display_detector.detect_and_display(image_file_path)
