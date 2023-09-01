@@ -4,6 +4,12 @@ The goal is to be sure that the entire object has been covered when doing mosaic
 
 ![Alt text](https://github.com/air01a/astromosaic_helper/blob/main/doc/interface.png?raw=true "sun")
 
+It uses cv2 to adapt image and detect contours, a bit of mathematics to find circle center and radius (find a circle that pass through the different points of a triangle), pysimplegui for the interface, and a custom script to read ser files. 
+
+The interface is very simple, simply choose a directory to watch, and if you want to observe the moon or the sun (the image processing will be slightly different as it's a bit more complex to find the contour of the moon due to the presence of many craters and the terminator). The picture displaying the results will be change according to your observation. Just click on "analyse" and put your pictures/video in the correct folder.
+
+
+
 # Example with image
 
 ![Alt text](https://github.com/air01a/astromosaic_helper/blob/main/doc/image1.png?raw=true "sun")   ![Alt text](https://github.com/air01a/astromosaic_helper/blob/main/doc/image2.png?raw=true "sun")   ![Alt text](https://github.com/air01a/astromosaic_helper/blob/main/doc/image3.png?raw=true "sun")
