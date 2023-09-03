@@ -494,7 +494,7 @@ def open_and_stretch_fits(path):
     hot_pixel_remover(image)
     debayer(image)
     adapt(image)
-    stretch(image, 0.2,0)
+    stretch(image, 0.5,0)
     normalize(image)
     return image
 

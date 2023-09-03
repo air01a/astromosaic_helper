@@ -1,9 +1,12 @@
+DEBUG=False
+
 import cv2
 import numpy as np
 import math
 import os
 #import time
-#import matplotlib.pyplot as plt
+if DEBUG:
+    import matplotlib.pyplot as plt
 
 
 CANNY_THRESHOLD1=30
@@ -28,19 +31,25 @@ class DiskDetector:
 
         # Blur to have soft contour
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+        peak = 1
+        _, self.image_blur = cv2.threshold(gray, BINARY_THRESHOLD*peak, 255, cv2.THRESH_BINARY)  
 
         # Binarize image to avoid problems with moon craters
         histo = cv2.calcHist(gray, [0], None, [256], [0, 256])
         peak = np.argmax(histo)
         peak = 1
-        #plt.figure()
-        #plt.title("Histogramme de l'image")
-        #plt.xlabel("Valeur des pixels")
-        #plt.ylabel("Fréquence")
-        #plt.plot(histo)
-        #plt.xlim([0, 256])
-        #plt.show()
-        _, self.image_blur = cv2.threshold(gray, BINARY_THRESHOLD*peak, 255, cv2.THRESH_BINARY)  
+        if DEBUG:
+            cv2.imshow('gray',self.image_blur)
+            
+            plt.figure()
+            plt.title("Histogramme de l'image")
+            plt.xlabel("Valeur des pixels")
+            plt.ylabel("Fréquence")
+            plt.plot(histo/histo.sum())
+            plt.xlim([0, 256])
+            plt.show()
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
         self.center_x, self.center_y, self.radius = None, None, None
         self.height = h
         self.diag = np.sqrt(self.width**2+self.height**2)

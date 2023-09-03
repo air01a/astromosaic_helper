@@ -53,7 +53,7 @@ class ImageHelper:
             if extension=='.ser':
                 ser_reader = SerReader(image_path)
                 frame = ser_reader.getImg(1)
-                frame = ImageHelper.stretch(frame, 0.3, 0.0001, 0.001, 0.001, 0.001)
+                frame = ImageHelper.stretch(frame, 0.5, 0.0001, 0.001, 0.001, 0.001)
 
             else:
                 frame = open_and_stretch_fits(image_path).data
