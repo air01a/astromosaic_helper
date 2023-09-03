@@ -5,8 +5,8 @@ from watchdog.events import FileSystemEventHandler
 stop = False
 
 class NewFileHandler(FileSystemEventHandler):
-    def __init__(self, callback, extensions):
-        self.extensions=extensions
+    def __init__(self, callback, validator):
+        self.validator=validator
         self.callback = callback
 
     def on_created(self, event):
@@ -15,10 +15,9 @@ class NewFileHandler(FileSystemEventHandler):
             return
 
         # Le nouvel événement de fichier a été cr   éé
-        for ext in self.extensions:
-            if event.src_path.lower().endswith(ext):
-                print(f"Nouveau fichier créé: {event.src_path}")
-                self.callback(event.src_path)
+        if self.validator(event.src_path):
+            print(f"Nouveau fichier créé: {event.src_path}")
+            self.callback(event.src_path)
 
 def stop_watch_directory():
     global stop

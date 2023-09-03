@@ -2,16 +2,21 @@ import PySimpleGUI as sg
 import os
 
 from image_utils import ImageHelper
-from layout import get_layout
+from layout import get_layout, get_window_size
 from watchdir import watch_directory
 from displaydiskdetector import DisplayDiskDetector
+import ctypes
+import platform
+
+
 
 def run():
     sg.theme('Black')
+    #(height,width)=get_window_size()
     layout = get_layout()
     observer = None
 
-    window = sg.Window('Astro mosaic helper [easyastro]', layout, finalize=True, element_justification='c')
+    window = sg.Window('Astro mosaic helper [easyastro]', layout, finalize=True, element_justification='c',resizable=True,default_element_size=(12, 1))
     image_helper = ImageHelper()
 
     mosaic_type=0
@@ -46,7 +51,7 @@ def run():
             window.Refresh()
 
         if event == '-NEW TASK-':
-            window.Element('-TASKING-').update('Working file: %s' % values[event])
+            window.Element('-TASKING-').update('Working file: %s' % os.path.basename(values[event]))
 
         if event == "Analyse":
             if running:
@@ -70,7 +75,8 @@ def run():
                         for f in image_files:
                             image_file_path = os.path.join(folder_path, f)
                             display_detector.detect_and_display(image_file_path)
-                    observer = watch_directory(folder_path, display_detector.file_call_back, ['ser'])
+                    print('Start Watcher')
+                    observer = watch_directory(folder_path, display_detector.file_call_back, image_helper.is_image_supported_format)
         
     window.close()
 

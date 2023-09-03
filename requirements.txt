@@ -1,8 +1,7 @@
-tk
 PySimpleGUI
 watchdog
-av
 opencv-python
-pillow
 scipy
 scikit-image
+PyWavelets
+astropy
