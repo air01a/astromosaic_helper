@@ -18,7 +18,7 @@ class ImageHelper:
     @staticmethod
     def is_image_supported_format(image_path):
         file, extension = path.splitext(image_path)
-        if extension in ['.ser', '.jpg', '.png', '.tif', '.bmp','.fits']:
+        if extension in ['.ser', '.jpg', '.png', '.tif', '.tiff', '.bmp','.fits']:
             return True
         return False
     
@@ -53,19 +53,24 @@ class ImageHelper:
             if extension=='.ser':
                 ser_reader = SerReader(image_path)
                 frame = ser_reader.getImg(1)
+                print(frame.shape)
                 frame = ImageHelper.stretch(frame, 0.5, 0.0001, 0.001, 0.001, 0.001)
+                print(frame.shape)
 
             else:
                 frame = open_and_stretch_fits(image_path).data
-            if frame.shape[2]==1:
-                frame=cv2.cvtColor(frame, cv2.COLOR_BAYER_GR2RGB)
+           
 #            cv2.imshow('test',frame)
 #            cv2.waitKey(0)
 
             
             
-        if extension in ['.jpg','.bmp','.tif','.png']:
+        if extension in ['.jpg','.bmp','.tif','.png','.tiff']:
             frame = cv2.imread(image_path,cv2.IMREAD_UNCHANGED)
+        print(path, frame.shape)
+        if len(frame.shape)==2 or frame.shape[2]==1:
+            frame=cv2.cvtColor(frame, cv2.COLOR_BAYER_GR2RGB)
+
         return frame
 
     def cv2_to_sg(self, image):
@@ -104,14 +109,16 @@ class ImageHelper:
         return path.join(base_path, relative_path)
         
     @staticmethod
-    def stretch(self, image, strength=0.1, alpha0=1,alpha1=1, alpha2=1, alpha3=1):
+    def stretch(image, strength=0.1, alpha0=1,alpha1=1, alpha2=1, alpha3=1):
 
 
         min_val = np.percentile(image, strength)
         max_val = np.percentile(image, 100 - strength)
-        image = (np.clip((image - min_val) * (65535.0 / (max_val - min_val) ), 0, 65535)/65535).astype(np.double)
 
+        if (min_val!=max_val):
+            image = (np.clip((image - min_val) * (65535.0 / (max_val - min_val) ), 0, 65535)).astype(np.uint16)
 
+        return image
         coeffs = pywt.dwt2(image, 'bior1.3')
         cA, (cH, cV, cD) = coeffs
         cA_smoothed = gaussian_filter(cA, sigma=alpha0)
